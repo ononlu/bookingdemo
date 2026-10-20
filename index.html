@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nook — Apartments in Ulaanbaatar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#" aria-label="nook, back to homepage" title="Back to homepage">nook</a>
+
+    <!-- CONTACT: edit the numbers below (each one can be different) -->
+    <div class="contact" aria-label="Contact us">
+      <span class="phone">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +976 0000 0000
+      </span>
+      <span class="cx"><img src="images/whatsapp-com-logo.svg" alt="WhatsApp"> +976 0000 0000</span>
+      <span class="cx"><img src="images/viber-com-logo.svg" alt="Viber"> +976 0000 0000</span>
+      <span class="cx"><img src="images/wechat-com-logo.svg" alt="WeChat"> WeChat ID</span>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="home">
+
+  <section class="hero">
+    <div class="wrap">
+      <h1>Stay somewhere that feels like yours.</h1>
+      <p class="lead">Quiet, cozy, and well-kept apartments across Ulaanbaatar for a weekend or a month. Pick your dates and book in a minute.</p>
+
+      <div class="book" role="search">
+        <div class="field"><label for="in">Check-in</label><input id="in" type="date"></div>
+        <div class="field"><label for="out">Check-out</label><input id="out" type="date"></div>
+        <div class="field"><label for="guests">Guests</label>
+          <select id="guests">
+            <option>1 guest</option>
+            <option selected>2 guests</option>
+            <option>3 guests</option>
+            <option>4+ guests</option>
+          </select>
+        </div>
+        <button class="btn" type="button">Search stays</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mapsec" id="map">
+    <div class="wrap">
+      <div class="head"><h2>Apartments across Ulaanbaatar</h2><p class="count">7 apartments</p></div>
+      <div id="map-canvas" role="region" aria-label="Map of apartments"></div>
+      <p class="note">Drag to move, scroll or pinch to zoom. Select a price to see the apartment.</p>
+    </div>
+  </section>
+
+  <section class="listings" id="stays">
+    <div class="wrap">
+      <div class="head">
+        <h2>All apartments</h2>
+        <div class="chips" role="group" aria-label="Filter apartments by size">
+          <button class="chip on" type="button" data-filter="all" aria-pressed="true">All</button>
+          <button class="chip" type="button" data-filter="studio" aria-pressed="false">Studio</button>
+          <button class="chip" type="button" data-filter="1-bedroom" aria-pressed="false">1 bedroom</button>
+          <button class="chip" type="button" data-filter="2-bedrooms" aria-pressed="false">2 bedrooms</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <a class="card" href="#apt1" data-category="1-bedroom">
+          <div class="photo p1"><span class="tag">Guest favourite</span></div>
+          <h3>Spacious & Cozy 1-bedroom apartment, Naadam Center</h3>
+          <p class="desc">Very clean and spacious, one bus ride from Central Square.</p>
+          <p class="meta">2 beds · 4 guests · Khan-Uul</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt2" data-category="1-bedroom">
+          <div class="photo p2"></div>
+          <h3>Spacious & Cozy 1-bedroom apartment, Naadam Center</h3>
+          <p class="desc">Steps from Naadam Shopping Center, with a gym on site.</p>
+          <p class="meta">2 beds · 4 guests · Khan-Uul</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt3" data-category="1-bedroom">
+          <div class="photo p3"><span class="tag">New</span></div>
+          <h3>Cozy 1-bedroom apartment, Central Square</h3>
+          <p class="desc">Airy, with east and west windows, next to the Chinggis Khaan Museum.</p>
+          <p class="meta">3 beds · 5 guests · Sukhbaatar</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt4" data-category="1-bedroom">
+          <div class="photo p4"></div>
+          <h3>Comfortable 1-bedroom apartment, Downtown</h3>
+          <p class="desc">Bright and comfortable, close to cafés and shops.</p>
+          <p class="meta">2 beds · 3 guests · Seoul Street</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt5" data-category="studio">
+          <div class="photo p5"></div>
+          <h3>Peaceful & Cozy 1-bed studio, State Department Store</h3>
+          <p class="desc">A quiet studio in the heart of the city, ideal for exploring on foot.</p>
+          <p class="meta">2 beds · 3 guests · Peace Avenue</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt6" data-category="1-bedroom">
+          <div class="photo p6"><span class="tag">Guest favourite</span></div>
+          <h3>Cozy & Modern 1-bedroom apartment, Downtown</h3>
+          <p class="desc">Modern and sunny, with a queen-size bed and full kitchen.</p>
+          <p class="meta">2 beds · 4 guests · Seoul Street</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+
+        <a class="card" href="#apt7" data-category="1-bedroom">
+          <div class="photo p1"></div>
+          <h3>Bright & Spacious 1-bedroom apartment, Downtown</h3>
+          <p class="desc">Skyline views on lively Seoul Street, great for longer stays.</p>
+          <p class="meta">3 beds · 5 guests · Seoul Street</p>
+          <p class="price"><b>190,000 ₮</b> per night</p>
+        </a>
+      </div>
+
+      <p class="empty" id="empty" hidden>No apartments in this category yet.</p>
+    </div>
+  </section>
+
+  <section class="perks" id="how">
+    <div class="wrap">
+      <div><h3>Clear prices</h3><p>The price you see includes cleaning and fees. No surprises at checkout.</p></div>
+      <div><h3>Free cancellation</h3><p>Change your plans up to 48 hours before check-in and get a full refund.</p></div>
+      <div><h3>Self check-in</h3><p>Get your door code by message on arrival day. No keys to collect.</p></div>
+    </div>
+  </section>
+
+</div>
+
+<section class="detail" id="apt1">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p1"></div>
+        <h2>Spacious & Cozy 1-bedroom apartment, Naadam Center</h2>
+        <p class="meta">2 beds · 4 guests · Khan Uul district, Ulaanbaatar</p>
+        <p class="about">A very clean, spacious 2-room apartment for rent per night in KH Apartment, located one bus ride from the central square, near Naadam Center and Khan Tower. Everything you need for a comfortable stay.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2688.582871376073!2d106.91011451198962!3d47.9044129710987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5d969343739fb855%3A0xf676a15c62e14da2!2sKH%20Apartment!5e1!3m2!1sen!2smn!4v1792390370175!5m2!1sen!2smn" title="Map: KH Apartment" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt2">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p2"></div>
+        <h2>Spacious & Cozy 1-bedroom apartment, Naadam Center</h2>
+        <p class="meta">2 beds · 4 guests · Khan Uul district, Ulaanbaatar</p>
+        <p class="about">Spacious and cozy 1-bedroom apartment in KH Apartments. A few steps from Naadam Shopping Center, where you can dine, shop, and stroll around, and the stadium for the Naadam Festival. Modern, spacious gym in the center. Plenty of restaurants, bars and coffee shops nearby to suit your taste.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2688.582871376073!2d106.91011451198962!3d47.9044129710987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5d969343739fb855%3A0xf676a15c62e14da2!2sKH%20Apartment!5e1!3m2!1sen!2smn!4v1792390370175!5m2!1sen!2smn" title="Map: KH Apartment" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt3">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p3"></div>
+        <h2>Cozy 1-bedroom apartment, Central Square</h2>
+        <p class="meta">3 beds · 5 guests · Sukhbaatar district, Ulaanbaatar</p>
+        <p class="about">Spacious apartment with one bedroom, a few steps from Central Square and the Chinggis Khaan Museum, near the German Embassy. Windows face east and west, so ventilation is very good.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2687.5523395577684!2d106.91511147641103!3d47.92425047122082!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU1JzI3LjMiTiAxMDbCsDU1JzAzLjciRQ!5e1!3m2!1sen!2smn!4v1792390486235!5m2!1sen!2smn" title="Map: Central Square" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt4">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p4"></div>
+        <h2>Comfortable 1-bedroom apartment, Downtown</h2>
+        <p class="meta">2 beds · 3 guests · Seoul Street, Ulaanbaatar</p>
+        <p class="about">Located near Seoul Street, one of Ulaanbaatar’s lively central areas with cafés, restaurants, convenience stores, and shopping nearby. This bright and comfortable space is perfect for couples, solo travelers, business guests, and long stays.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2688.156494959435!2d106.90093227641036!3d47.912621371219586!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU0JzQ1LjQiTiAxMDbCsDU0JzEyLjYiRQ!5e1!3m2!1sen!2smn!4v1792390933460!5m2!1sen!2smn" title="Map: Seoul Street" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt5">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p5"></div>
+        <h2>Peaceful & Cozy 1-bed studio, State Department Store</h2>
+        <p class="meta">2 beds · 3 guests · Peace Avenue, Ulaanbaatar</p>
+        <p class="about">This 1-bed studio has one of the best locations in the city, near the State Department Store. Ideal for discovering the city on foot. This cozy studio offers a quiet, comfortable space that’s perfect for travelers looking to relax or explore. Enjoy walkable access to restaurants, shops, and local attractions.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2687.8792303097684!2d106.90379047641063!3d47.91795857122009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU1JzA0LjciTiAxMDbCsDU0JzIyLjkiRQ!5e1!3m2!1sen!2smn!4v1792390572324!5m2!1sen!2smn" title="Map: State Department Store" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt6">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p6"></div>
+        <h2>Cozy & Modern 1-bedroom apartment, Downtown</h2>
+        <p class="meta">2 beds · 4 guests · Seoul Street, Ulaanbaatar</p>
+        <p class="about">Enjoy a comfortable stay in this bright and modern one-bedroom apartment in the heart of the city. It features a cozy living room with a smart TV, a fully equipped kitchen, a spacious bedroom with a comfortable queen-size bed, and plenty of natural light throughout. Perfect for couples, solo travelers, business guests, or small families looking for a clean, quiet, and convenient place to stay.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2688.164609113545!2d106.89834697641032!3d47.91246517121946!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU0JzQ0LjkiTiAxMDbCsDU0JzAzLjMiRQ!5e1!3m2!1sen!2smn!4v1792391286746!5m2!1sen!2smn" title="Map: Seoul Street" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+
+<section class="detail" id="apt7">
+  <div class="wrap">
+    <a class="back" href="#stays">← Back to all stays</a>
+    <div class="dgrid">
+      <div>
+        <div class="photo big p1"></div>
+        <h2>Bright & Spacious 1-bedroom apartment, Downtown</h2>
+        <p class="meta">3 beds · 5 guests · Seoul Street, Ulaanbaatar</p>
+        <p class="about">Welcome to our spacious and comfortable apartment in the heart of Ulaanbaatar on Seoul Street. A perfect combination of comfort, convenience, and beautiful skyline views, ideal for families, couples, business travelers, and long stays. Seoul Street is one of the city’s most convenient, central, and energetic neighborhoods, perfect for exploring Ulaanbaatar on foot.</p>
+        <div class="gmap">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2688.1589105067646!2d106.8973340764103!3d47.91257487121948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU0JzQ1LjMiTiAxMDbCsDUzJzU5LjciRQ!5e1!3m2!1sen!2smn!4v1792391196984!5m2!1sen!2smn" title="Map: Seoul Street" style="border:0" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        </div>
+      </div>
+      <aside class="reserve"></aside>
+    </div>
+  </div>
+</section>
+</main>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  // ---------- Map ----------
+  // To get exact coordinates: in Google Maps right-click the building,
+  // then click the "47.9048, 106.9130" line at the top to copy it.
+  const apartments = [
+    { id: 'apt1', name: 'Spacious & Cozy 1-bedroom, Naadam Center',  price: 190000, lat: 47.90441, lng: 106.91011 }, // KH Apartment (from your Google link)
+    { id: 'apt2', name: 'Spacious & Cozy 1-bedroom, Naadam Center',  price: 190000, lat: 47.90451, lng: 106.91021 }, // same building as apt1 (nudged so both pins show)
+    { id: 'apt3', name: 'Cozy 1-bedroom, Central Square',            price: 190000, lat: 47.92425,  lng: 106.91769 }, // from your Google link
+    { id: 'apt4', name: 'Comfortable 1-bedroom, Downtown',           price: 190000, lat: 47.91261,  lng: 106.9035 }, // from your Google link
+    { id: 'apt5', name: 'Peaceful & Cozy 1-bed studio, State Department Store', price: 190000, lat: 47.91797, lng: 106.90636 }, // from your Google link
+    { id: 'apt6', name: 'Cozy & Modern 1-bedroom, Downtown',         price: 190000, lat: 47.91247,  lng: 106.90092 }, // from your Google link
+    { id: 'apt7', name: 'Bright & Spacious 1-bedroom, Downtown',     price: 190000, lat: 47.91258,  lng: 106.89992 }  // from your Google link
+  ];
+
+  const map = L.map('map-canvas', { scrollWheelZoom: false });
+  // Esri street map tiles: no API key needed, works from a local file and on your domain.
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 18,
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Scroll-wheel zoom only after clicking the map, so page scrolling isn't hijacked
+  map.on('focus', () => map.scrollWheelZoom.enable());
+  map.on('blur',  () => map.scrollWheelZoom.disable());
+
+  const points = apartments.map(a => {
+    const icon = L.divIcon({
+      className: 'price-wrap',
+      iconSize: [0, 0],
+      html: '<span class="price-pin">' + (a.price / 1000) + 'k ₮</span>'
+    });
+    L.marker([a.lat, a.lng], { icon, title: a.name })
+      .addTo(map)
+      .bindPopup('<strong>' + a.name + '</strong><br>' + a.price.toLocaleString('en-US') +
+                 ' ₮ per night<br><a href="#' + a.id + '">View apartment →</a>');
+    return [a.lat, a.lng];
+  });
+  map.fitBounds(points, { padding: [50, 50], maxZoom: 15 });
+
+  // The map is hidden while an apartment page is open; fix its size when we come back
+  window.addEventListener('hashchange', () => setTimeout(() => map.invalidateSize(), 50));
+
+  // ---------- Booking (Supabase) ----------
+  const SUPABASE_URL = 'https://idigscreylxeyllxrndt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_G0kEaTGf676Q5P5alY3pRw_AadJTm1s';
+  const READY = !SUPABASE_URL.startsWith('YOUR_');
+  const sb = READY ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const MAXG = { apt1: 4, apt2: 4, apt3: 5, apt4: 3, apt5: 3, apt6: 4, apt7: 5 };
+  const fmt = n => n.toLocaleString('en-US') + ' ₮';
+  const today = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  const addDay = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
+  const nightsBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+  let booked = {};
+  const widgets = [];
+  const conflict = (id, a, b) => (booked[id] || []).some(r => a < r.check_out && b > r.check_in);
+
+  async function loadBooked() {
+    if (!READY) return;
+    const { data, error } = await sb.rpc('get_all_booked');
+    if (error) return console.error(error);
+    booked = {};
+    data.forEach(r => (booked[r.apartment_id] ||= []).push(r));
+    widgets.forEach(w => w.refresh(false));
+  }
+
+  document.querySelectorAll('.detail').forEach(sec => {
+    const id = sec.id, box = sec.querySelector('.reserve');
+    const price = apartments.find(a => a.id === id).price;
+    const opts = Array.from({ length: MAXG[id] }, (_, i) => `<option value="${i + 1}">${i + 1} guest${i ? 's' : ''}</option>`).join('');
+    box.innerHTML = `
+      <p class="price"><b>${fmt(price)}</b> per night</p>
+      <label>Check-in<input class="bk-in" type="date" min="${today}"></label>
+      <label>Check-out<input class="bk-out" type="date"></label>
+      <p class="bk-booked"></p>
+      <label>Guests<select class="bk-g">${opts}</select></label>
+      <label>Full name<input class="bk-name" autocomplete="name"></label>
+      <label>Phone<input class="bk-phone" type="tel" autocomplete="tel"></label>
+      <label>Email (optional)<input class="bk-email" type="email" autocomplete="email"></label>
+      <p class="bk-total"></p>
+      <p class="bk-msg" role="status"></p>
+      <button class="btn" type="button">Request booking</button>`;
+    const q = s => box.querySelector(s), btn = q('.btn'), msg = q('.bk-msg');
+    const say = (t, c) => { msg.textContent = t; msg.className = 'bk-msg ' + (c || ''); };
+
+    function refresh(showMsg = true) {
+      const a = q('.bk-in').value, b = q('.bk-out').value;
+      q('.bk-out').min = addDay(a || today);
+      const list = (booked[id] || []).map(r => r.check_in + ' → ' + r.check_out).join(', ');
+      q('.bk-booked').textContent = list ? 'Already booked: ' + list : '';
+      let bad = '';
+      q('.bk-total').textContent = '';
+      if (a && b) {
+        if (b <= a) bad = 'Check-out must be after check-in.';
+        else if (conflict(id, a, b)) bad = 'Those dates are already booked.';
+        else { const n = nightsBetween(a, b); q('.bk-total').textContent = n + ' night' + (n > 1 ? 's' : '') + ' · Total ' + fmt(n * price); }
+      }
+      if (showMsg) say(bad, 'err');
+      btn.disabled = !READY || !!bad || !a || !b;
+    }
+    widgets.push({ refresh, set: (a, b, g) => { q('.bk-in').value = a; q('.bk-out').value = b; if (g <= MAXG[id]) q('.bk-g').value = g; refresh(true); } });
+    box.addEventListener('input', () => refresh(true));
+    if (!READY) say('Online booking is not switched on yet.', 'err');
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true; say('Sending…');
+      const { data, error } = await sb.rpc('create_booking', {
+        apt: id, d_in: q('.bk-in').value, d_out: q('.bk-out').value, n_guests: +q('.bk-g').value,
+        g_name: q('.bk-name').value, g_phone: q('.bk-phone').value, g_email: q('.bk-email').value || null
+      });
+      await loadBooked();
+      if (error) { say(error.message, 'err'); btn.disabled = false; return; }
+      say('Request sent! Reference ' + data.id.slice(0, 8).toUpperCase() + ' · Total ' + fmt(data.total) + '. We will contact you to confirm.', 'ok');
+      ['.bk-in', '.bk-out', '.bk-name', '.bk-phone', '.bk-email'].forEach(s => q(s).value = '');
+      refresh(false); btn.disabled = true;
+    });
+    refresh(false);
+  });
+
+  // ---------- Filters (category chips + search by dates and guests) ----------
+  const chips = document.querySelectorAll('.chip');
+  const cards = document.querySelectorAll('.card');
+  const empty = document.getElementById('empty');
+  let cat = 'all', search = null;
+
+  function applyFilters() {
+    let shown = 0;
+    cards.forEach(card => {
+      const id = card.getAttribute('href').slice(1);
+      const ok = (cat === 'all' || card.dataset.category === cat) &&
+        (!search || (MAXG[id] >= search.g && !(search.a && search.b && conflict(id, search.a, search.b))));
+      card.hidden = !ok;
+      if (ok) shown++;
+    });
+    empty.textContent = search ? 'No apartments are free for those dates and guests.' : 'No apartments in this category yet.';
+    empty.hidden = shown > 0;
+  }
+
+  chips.forEach(chip => chip.addEventListener('click', () => {
+    cat = chip.dataset.filter;
+    chips.forEach(c => { const on = c === chip; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+    applyFilters();
+  }));
+
+  document.querySelector('.book .btn').addEventListener('click', async () => {
+    const a = document.getElementById('in').value, b = document.getElementById('out').value;
+    if (a && b && b <= a) return alert('Check-out must be after check-in.');
+    await loadBooked();
+    search = { a, b, g: parseInt(document.getElementById('guests').value) };
+    widgets.forEach(w => w.set(a, b, search.g));
+    applyFilters();
+    document.getElementById('stays').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  loadBooked();
+</script>
+
+</body>
+</html>
