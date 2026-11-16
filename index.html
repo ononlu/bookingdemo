@@ -28,6 +28,8 @@
   </div>
 </header>
 
+<div class="notice" id="offline" role="status" hidden><div class="wrap">Online booking is temporarily unavailable. Please contact us on WhatsApp or Viber to book.</div></div>
+
 <main>
 <div class="home">
 
@@ -122,12 +124,13 @@
         </a>
 
         <a class="card" href="#apt7" data-category="1-bedroom">
-          <div class="photo p1"></div>
+          <div class="photo p7"></div>
           <h3>Bright & Spacious 1-bedroom apartment, Downtown</h3>
           <p class="desc">Skyline views on lively Seoul Street, great for longer stays.</p>
           <p class="meta">3 beds · 5 guests · Seoul Street</p>
           <p class="price"><b>190,000 ₮</b> per night</p>
         </a>
+
       </div>
 
       <p class="empty" id="empty" hidden>No apartments in this category yet.</p>
@@ -269,11 +272,13 @@
     </div>
   </div>
 </section>
+
 </main>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script>
   // ---------- Map ----------
   // To get exact coordinates: in Google Maps right-click the building,
@@ -288,11 +293,20 @@
     { id: 'apt7', name: 'Bright & Spacious 1-bedroom, Downtown',     price: 190000, lat: 47.91258,  lng: 106.89992 }  // from your Google link
   ];
 
+  if (typeof L === 'undefined') {
+    document.getElementById('map-canvas').textContent = 'Map temporarily unavailable. Apartment listings and booking forms are still accessible below.';
+  } else {
   const map = L.map('map-canvas', { scrollWheelZoom: false });
-  // Esri street map tiles: no API key needed, works from a local file and on your domain.
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 18,
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, OpenStreetMap contributors'
+  // OpenStreetMap tiles: community-edited and usually the most current for Ulaanbaatar.
+  // OSM blocks pages opened straight from a computer (file://), so we use Esri only for local testing.
+  const local = location.protocol === 'file:';
+  L.tileLayer(local
+    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
+    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: local ? 18 : 19,
+    attribution: local
+      ? 'Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, OpenStreetMap contributors'
+      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
 
   // Scroll-wheel zoom only after clicking the map, so page scrolling isn't hijacked
@@ -315,28 +329,47 @@
 
   // The map is hidden while an apartment page is open; fix its size when we come back
   window.addEventListener('hashchange', () => setTimeout(() => map.invalidateSize(), 50));
+  }
 
   // ---------- Booking (Supabase) ----------
-  const SUPABASE_URL = 'https://idigscreylxeyllxrndt.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_G0kEaTGf676Q5P5alY3pRw_AadJTm1s';
-  const READY = !SUPABASE_URL.startsWith('YOUR_');
-  const sb = READY ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+  const cfg = window.NOOK_CONFIG || {};
+  const BANK = cfg.bank || { bank: '', holder: '', account: '' };
+  const PHOTOS = cfg.photos || {};
+  const configured = /^https:\/\/.+\.supabase\.co\/?$/.test(cfg.supabaseUrl || '') && !!cfg.supabaseAnonKey && !cfg.supabaseAnonKey.startsWith('YOUR_');
+  const READY = configured && typeof window.supabase !== 'undefined';
+  const sb = READY ? window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey) : null;
   const MAXG = { apt1: 4, apt2: 4, apt3: 5, apt4: 3, apt5: 3, apt6: 4, apt7: 5 };
   const fmt = n => n.toLocaleString('en-US') + ' ₮';
   const today = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   const addDay = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
   const nightsBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+  const OFFLINE_MSG = 'Online booking is temporarily unavailable. Please contact us on WhatsApp or Viber.';
+  const friendly = m => /fetch|network|timeout|load failed|\b5\d\d\b/i.test(m) ? OFFLINE_MSG : m;
+  let offline = false;
+  const notice = document.getElementById('offline');
+  if (configured && !READY) console.error('Supabase SDK failed to load. Check CDN access.');
+  notice.hidden = READY;               // visible while Supabase is not set up
+  function setOffline(v) {
+    offline = v;
+    notice.hidden = !v && READY;
+    widgets.forEach(w => w.refresh(false));
+  }
   let booked = {};
   const widgets = [];
   const conflict = (id, a, b) => (booked[id] || []).some(r => a < r.check_out && b > r.check_in);
 
   async function loadBooked() {
     if (!READY) return;
-    const { data, error } = await sb.rpc('get_all_booked');
-    if (error) return console.error(error);
-    booked = {};
-    data.forEach(r => (booked[r.apartment_id] ||= []).push(r));
-    widgets.forEach(w => w.refresh(false));
+    try {
+      const { data, error } = await sb.rpc('get_all_booked');
+      if (error) throw error;
+      booked = {};
+      data.forEach(r => (booked[r.apartment_id] ||= []).push(r));
+      setOffline(false);
+    } catch (e) {
+      console.error(e);
+      setOffline(true);
+    }
   }
 
   document.querySelectorAll('.detail').forEach(sec => {
@@ -354,8 +387,30 @@
       <label>Email (optional)<input class="bk-email" type="email" autocomplete="email"></label>
       <p class="bk-total"></p>
       <p class="bk-msg" role="status"></p>
-      <button class="btn" type="button">Request booking</button>`;
-    const q = s => box.querySelector(s), btn = q('.btn'), msg = q('.bk-msg');
+      <button class="btn bk-go" type="button">Request booking</button>
+
+      <div class="pay">
+        <h3>Pay by bank transfer</h3>
+        <dl>
+          <div><dt>Bank</dt><dd class="bank-name"></dd></div>
+          <div><dt>Account holder</dt><dd class="bank-holder"></dd></div>
+          <div><dt>Account number</dt><dd><span class="bank-account"></span><button class="copy" type="button">Copy</button></dd></div>
+        </dl>
+        <label>Booking reference<input class="pay-ref" placeholder="Full reference shown after booking" autocomplete="off"></label>
+        <label>Transaction number<input class="pay-txn" placeholder="From your bank receipt" autocomplete="off"></label>
+        <p class="bk-msg pay-msg" role="status"></p>
+        <button class="btn pay-send" type="button">Send transaction number</button>
+        <p class="hint">Transfer the total, write the booking reference in the transfer note, then enter the transaction number from your receipt so we can confirm your stay.</p>
+      </div>`;
+    const q = s => box.querySelector(s), btn = q('.bk-go'), msg = q('.bk-msg');
+    q('.bank-name').textContent = BANK.bank || 'Not configured';
+    q('.bank-holder').textContent = BANK.holder || 'Not configured';
+    q('.bank-account').textContent = BANK.account || 'Not configured';
+    if (!BANK.bank || !BANK.holder || !BANK.account) {
+      const warning = document.createElement('p'); warning.className = 'bk-msg err';
+      warning.textContent = 'Bank transfer details are not configured yet. Do not transfer money until the host provides verified details.';
+      q('.pay').prepend(warning);
+    }
     const say = (t, c) => { msg.textContent = t; msg.className = 'bk-msg ' + (c || ''); };
 
     function refresh(showMsg = true) {
@@ -370,26 +425,133 @@
         else if (conflict(id, a, b)) bad = 'Those dates are already booked.';
         else { const n = nightsBetween(a, b); q('.bk-total').textContent = n + ' night' + (n > 1 ? 's' : '') + ' · Total ' + fmt(n * price); }
       }
-      if (showMsg) say(bad, 'err');
-      btn.disabled = !READY || !!bad || !a || !b;
+      if (offline) say(OFFLINE_MSG, 'err');
+      else if (showMsg) say(bad, 'err');
+      btn.disabled = !READY || offline || !!bad || !a || !b;
     }
     widgets.push({ refresh, set: (a, b, g) => { q('.bk-in').value = a; q('.bk-out').value = b; if (g <= MAXG[id]) q('.bk-g').value = g; refresh(true); } });
-    box.addEventListener('input', () => refresh(true));
+    box.addEventListener('input', e => { if (!e.target.closest('.pay')) refresh(true); });
     if (!READY) say('Online booking is not switched on yet.', 'err');
 
     btn.addEventListener('click', async () => {
       btn.disabled = true; say('Sending…');
-      const { data, error } = await sb.rpc('create_booking', {
+      let data, error;
+      try { ({ data, error } = await sb.rpc('create_booking', {
         apt: id, d_in: q('.bk-in').value, d_out: q('.bk-out').value, n_guests: +q('.bk-g').value,
         g_name: q('.bk-name').value, g_phone: q('.bk-phone').value, g_email: q('.bk-email').value || null
-      });
+      })); } catch (e) { error = e; }
       await loadBooked();
-      if (error) { say(error.message, 'err'); btn.disabled = false; return; }
-      say('Request sent! Reference ' + data.id.slice(0, 8).toUpperCase() + ' · Total ' + fmt(data.total) + '. We will contact you to confirm.', 'ok');
+      if (error) { say(friendly(error.message), 'err'); btn.disabled = false; return; }
+      const ref = data.id; // Full unpredictable UUID, not an easily guessed 8-character prefix
+      say('Request sent! Reference ' + ref + ' · Total ' + fmt(data.total) + '. Now pay by bank transfer below.', 'ok');
+      q('.pay-ref').value = ref;
       ['.bk-in', '.bk-out', '.bk-name', '.bk-phone', '.bk-email'].forEach(s => q(s).value = '');
       refresh(false); btn.disabled = true;
     });
     refresh(false);
+
+    // ----- bank transfer: copy account number + send transaction number -----
+    const pmsg = q('.pay-msg'), psend = q('.pay-send');
+    const psay = (t, c) => { pmsg.textContent = t; pmsg.className = 'bk-msg pay-msg ' + (c || ''); };
+    q('.copy').addEventListener('click', async e => {
+      if (!BANK.account) return;
+      try { await navigator.clipboard.writeText(BANK.account.replace(/\s/g, '')); e.target.textContent = 'Copied'; }
+      catch { e.target.textContent = 'Select it'; }
+      setTimeout(() => e.target.textContent = 'Copy', 1500);
+    });
+    psend.addEventListener('click', async () => {
+      const ref = q('.pay-ref').value.trim(), txn = q('.pay-txn').value.trim();
+      if (!ref) return psay('Enter your booking reference.', 'err');
+      if (txn.length < 4) return psay('Enter the transaction number from your bank receipt.', 'err');
+      const offline = 'We could not save it online. Please send the number to us on WhatsApp or Viber with your reference ' + ref + '.';
+      if (!READY || !BANK.bank || !BANK.holder || !BANK.account) return psay('Online payment reporting or bank details are not configured. Contact the host.', 'err');
+      psend.disabled = true; psay('Sending…');
+      let error;
+      try { ({ error } = await sb.rpc('submit_payment', { ref, txn })); } catch (e) { error = e; }
+      psend.disabled = false;
+      if (error) return psay(error.message.includes('submit_payment') || /fetch|network|timeout/i.test(error.message) ? offline : error.message, 'err');
+      psay('Transaction reference received. This is not payment confirmation; the host will verify the transfer.', 'ok');
+      q('.pay-txn').value = '';
+    });
+  });
+
+  // ---------- Photos: up to 10 per apartment ----------
+  const MAX_PHOTOS = 10;
+  const DEV = true; // Always show missing-image warnings to help debug GitHub Pages paths
+  const enc = p => p.split('/').map(encodeURIComponent).join('/');
+  const photoList = id => (PHOTOS[id] || '').split('\n')
+    .map(s => s.trim().replace(/^\/\/\s*/, '').replace(/^["']+|["',\s]+$/g, '').replace(/\\/g, '/').replace(/^\.\//, ''))
+    .filter(s => /\.[a-z0-9]{2,5}$/i.test(s))
+    .slice(0, MAX_PHOTOS);
+  const tryLoad = src => new Promise(res => {
+    const im = new Image();
+    im.onload = () => res(src);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+  // Tries the path safely encoded, then as typed, then without a leading "html/" folder
+  const loadPhoto = async p =>
+    (await tryLoad(enc(p))) || (await tryLoad(p)) || (/^html\//i.test(p) ? await tryLoad(enc(p.slice(5))) : null);
+  const probe = async id => {
+    const list = photoList(id);
+    const res = await Promise.all(list.map(loadPhoto));
+    return { pics: res.filter(Boolean), bad: list.filter((p, i) => !res[i]) };
+  };
+  const setPhoto = (el, src) => { el.classList.add('has-img'); el.style.backgroundImage = `url("${src}")`; };
+
+  document.querySelectorAll('.detail').forEach(async sec => {
+    const { pics, bad } = await probe(sec.id);
+    if (bad.length && DEV) {
+      const w = document.createElement('p');
+      w.className = 'photo-warn';
+      w.textContent = 'Photos missing from this GitHub deployment (check case-sensitive paths): ' + bad.join('  |  ');
+      sec.querySelector('.photo.big').before(w);
+    }
+    if (!pics.length) return;
+    const cardPhoto = document.querySelector(`.card[href="#${sec.id}"] .photo`);
+    if (cardPhoto) setPhoto(cardPhoto, pics[0]);
+    const big = sec.querySelector('.photo.big');
+    const n = pics.length;
+    big.classList.add('has-img', 'slider');
+    big.innerHTML = '<div class="track" tabindex="0" aria-label="Photos">' +
+      pics.map((s, i) => `<img src="${s}" alt="Photo ${i + 1} of ${n}" draggable="false"${i ? ' loading="lazy"' : ''}>`).join('') + '</div>' +
+      (n > 1 ? '<button class="nav prev" type="button" aria-label="Previous photo">‹</button><button class="nav next" type="button" aria-label="Next photo">›</button><span class="slide-count">1 / ' + n + '</span>' : '');
+    if (n < 2) return;
+
+    const track = big.querySelector('.track'), prev = big.querySelector('.prev'),
+          next = big.querySelector('.next'), count = big.querySelector('.slide-count');
+    const strip = document.createElement('div');
+    strip.className = 'thumbs';
+    const thumbs = pics.map((src, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Show photo ' + (i + 1));
+      b.innerHTML = `<img src="${src}" alt="">`;
+      b.addEventListener('click', () => go(i));
+      strip.appendChild(b);
+      return b;
+    });
+    big.after(strip);
+
+    const index = () => Math.round(track.scrollLeft / (track.clientWidth || 1));
+    const go = i => track.scrollTo({ left: Math.max(0, Math.min(n - 1, i)) * track.clientWidth, behavior: 'smooth' });
+    const sync = () => {
+      const i = index();
+      count.textContent = (i + 1) + ' / ' + n;
+      prev.disabled = i === 0;
+      next.disabled = i === n - 1;
+      thumbs.forEach((t, k) => t.classList.toggle('on', k === i));
+      const t = thumbs[i];
+      strip.scrollTo({ left: t.offsetLeft - (strip.clientWidth - t.clientWidth) / 2, behavior: 'smooth' });
+    };
+    prev.addEventListener('click', () => go(index() - 1));
+    next.addEventListener('click', () => go(index() + 1));
+    track.addEventListener('scroll', () => { clearTimeout(track._t); track._t = setTimeout(sync, 60); });
+    track.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') go(index() - 1);
+      if (e.key === 'ArrowRight') go(index() + 1);
+    });
+    sync();
   });
 
   // ---------- Filters (category chips + search by dates and guests) ----------
