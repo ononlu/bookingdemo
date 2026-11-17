@@ -6,7 +6,7 @@ window.NOOK_CONFIG = {
   // Bank transfer details shown on the website.
   // IMPORTANT: replace the placeholder account number before accepting payments.
   bank: {
-    bank: 'TDB',
+    bank: TDB,
     holder: 'ONON LU',
     account: '0000 0000 0000'
   }
