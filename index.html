@@ -8,12 +8,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 <style>
 /* Photos in plain HTML: swipeable gallery (no JavaScript needed) */
 .p7{background:linear-gradient(135deg,#C6D1D4,#7C9CA6)}
 .gal{display:flex;aspect-ratio:16/9;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;border-radius:var(--r);background:var(--line)}
 .gal img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;scroll-snap-stop:always;display:block}
 .swipe{margin:8px 0 20px;color:var(--muted);font-size:.8rem}
+/* Calendar: booked dates are greyed out and crossed through */
+.flatpickr-calendar{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18);font-family:inherit}
+.flatpickr-calendar:before,.flatpickr-calendar:after{display:none}
+.flatpickr-day,.flatpickr-weekday,span.flatpickr-weekday,.flatpickr-current-month,.flatpickr-current-month input.cur-year,.flatpickr-monthDropdown-months{color:var(--ink);background:transparent}
+.flatpickr-months .flatpickr-prev-month svg,.flatpickr-months .flatpickr-next-month svg{fill:var(--ink)}
+.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{color:var(--muted)}
+.flatpickr-day:hover{background:var(--line);border-color:var(--line)}
+.flatpickr-day.flatpickr-disabled,.flatpickr-day.flatpickr-disabled:hover{color:var(--muted);opacity:.4;text-decoration:line-through;background:transparent;border-color:transparent;cursor:not-allowed}
+.flatpickr-day.selected,.flatpickr-day.selected:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pay-check{justify-self:start;padding:9px 16px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:.88rem;cursor:pointer}
 </style>
 </head>
 <body>
@@ -279,6 +290,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 <script src="config.js"></script>
 <script>
   // ---------- Map ----------
@@ -325,6 +337,7 @@
   const sb = READY ? window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey) : null;
   const MAXG = { apt1: 4, apt2: 4, apt3: 5, apt4: 3, apt5: 3, apt6: 4, apt7: 5 };
   const fmt = n => n.toLocaleString('en-US') + ' ₮';
+  const showRef = r => (r && r.length === 10) ? r.slice(0, 5) + '-' + r.slice(5) : r;
   const today = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   const addDay = d => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + 1); return x.toISOString().slice(0, 10); };
   const nightsBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
@@ -363,8 +376,8 @@
     const opts = Array.from({ length: MAXG[id] }, (_, i) => `<option value="${i + 1}">${i + 1} guest${i ? 's' : ''}</option>`).join('');
     box.innerHTML = `
       <p class="price"><b>${fmt(price)}</b> per night</p>
-      <label>Check-in<input class="bk-in" type="date" min="${today}"></label>
-      <label>Check-out<input class="bk-out" type="date"></label>
+      <label>Check-in<input class="bk-in" type="text" placeholder="Select date" autocomplete="off"></label>
+      <label>Check-out<input class="bk-out" type="text" placeholder="Select date" autocomplete="off"></label>
       <p class="bk-booked"></p>
       <label>Guests<select class="bk-g">${opts}</select></label>
       <label>Full name<input class="bk-name" autocomplete="name"></label>
@@ -381,11 +394,13 @@
           <div><dt>Account holder</dt><dd class="bank-holder"></dd></div>
           <div><dt>Account number</dt><dd><span class="bank-account"></span><button class="copy" type="button">Copy</button></dd></div>
         </dl>
-        <label>Booking reference<input class="pay-ref" placeholder="Full reference shown after booking" autocomplete="off"></label>
+        <label>Booking reference<input class="pay-ref" placeholder="Shown after booking, e.g. A3F9C-21B7E" autocomplete="off"></label>
         <label>Transaction number<input class="pay-txn" placeholder="From your bank receipt" autocomplete="off"></label>
+        <label>Type the transaction number again<input class="pay-txn2" placeholder="Same number, to avoid typos" autocomplete="off"></label>
         <p class="bk-msg pay-msg" role="status"></p>
         <button class="btn pay-send" type="button">Send transaction number</button>
-        <p class="hint">Transfer the total, write the booking reference in the transfer note, then enter the transaction number from your receipt so we can confirm your stay.</p>
+        <button class="pay-check" type="button">Check my booking status</button>
+        <p class="hint">Transfer the total and write the booking reference in the transfer note. Sending the number does not confirm your stay: we check the transfer first. If you typed it wrong, just send the correct one again.</p>
       </div>`;
     const q = s => box.querySelector(s), btn = q('.bk-go'), msg = q('.bk-msg');
     q('.bank-name').textContent = BANK.bank || 'Not configured';
@@ -398,9 +413,38 @@
     }
     const say = (t, c) => { msg.textContent = t; msg.className = 'bk-msg ' + (c || ''); };
 
+    // Calendars: booked nights are greyed out
+    let fpIn = null, fpOut = null, sig = '';
+    const shift = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+    function syncPickers(a) {
+      if (!fpIn) return;
+      const list = booked[id] || [];
+      const s = list.map(r => r.check_in + r.check_out).join('|');
+      if (s !== sig) {
+        sig = s;
+        fpIn.set('disable', list.map(r => ({ from: r.check_in, to: shift(r.check_out, -1) })));
+        fpOut.set('disable', list.filter(r => r.check_out > shift(r.check_in, 1))
+          .map(r => ({ from: shift(r.check_in, 1), to: shift(r.check_out, -1) })));
+      }
+      fpOut.set('minDate', shift(a || today, 1));
+      const nxt = a ? list.map(r => r.check_in).filter(d => d > a).sort()[0] : undefined;
+      fpOut.set('maxDate', nxt);
+    }
+    if (window.flatpickr) {
+      const common = { dateFormat: 'Y-m-d', disableMobile: true };
+      fpIn = flatpickr(q('.bk-in'), { ...common, minDate: today, onChange: (_, a) => {
+        syncPickers(a);
+        const o = q('.bk-out').value;
+        if (o && (o <= a || conflict(id, a, o))) fpOut.clear();
+        refresh(true);
+        if (a && !q('.bk-out').value) fpOut.open();
+      } });
+      fpOut = flatpickr(q('.bk-out'), { ...common, minDate: shift(today, 1), onChange: () => refresh(true) });
+    } else { q('.bk-in').type = 'date'; q('.bk-out').type = 'date'; }
+
     function refresh(showMsg = true) {
       const a = q('.bk-in').value, b = q('.bk-out').value;
-      q('.bk-out').min = addDay(a || today);
+      syncPickers(a);
       const list = (booked[id] || []).map(r => r.check_in + ' → ' + r.check_out).join(', ');
       q('.bk-booked').textContent = list ? 'Already booked: ' + list : '';
       let bad = '';
@@ -414,7 +458,10 @@
       else if (showMsg) say(bad, 'err');
       btn.disabled = !READY || offline || !!bad || !a || !b;
     }
-    widgets.push({ refresh, set: (a, b, g) => { q('.bk-in').value = a; q('.bk-out').value = b; if (g <= MAXG[id]) q('.bk-g').value = g; refresh(true); } });
+    widgets.push({ refresh, set: (a, b, g) => {
+      if (fpIn) { fpIn.setDate(a || null, false); syncPickers(a); fpOut.setDate(b || null, false); }
+      else { q('.bk-in').value = a; q('.bk-out').value = b; }
+      if (g <= MAXG[id]) q('.bk-g').value = g; refresh(true); } });
     box.addEventListener('input', e => { if (!e.target.closest('.pay')) refresh(true); });
     if (!READY) say('Online booking is not switched on yet.', 'err');
 
@@ -427,9 +474,10 @@
       })); } catch (e) { error = e; }
       await loadBooked();
       if (error) { say(friendly(error.message), 'err'); btn.disabled = false; return; }
-      const ref = data.id;
-      say('Request sent! Reference ' + ref + ' · Total ' + fmt(data.total) + '. Now pay by bank transfer below.', 'ok');
+      const ref = showRef(data.ref || data.id);
+      say('Request sent! Your reference: ' + ref + ' · Total ' + fmt(data.total) + '. Your dates are held for 24 hours. Write the reference in your bank transfer note, then send the transaction number below.', 'ok');
       q('.pay-ref').value = ref;
+      if (fpIn) { fpIn.clear(); fpOut.clear(); }
       ['.bk-in', '.bk-out', '.bk-name', '.bk-phone', '.bk-email'].forEach(s => q(s).value = '');
       refresh(false); btn.disabled = true;
     });
@@ -443,19 +491,37 @@
       catch { e.target.textContent = 'Select it'; }
       setTimeout(() => e.target.textContent = 'Copy', 1500);
     });
+    const cleanRef = () => q('.pay-ref').value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     psend.addEventListener('click', async () => {
-      const ref = q('.pay-ref').value.trim(), txn = q('.pay-txn').value.trim();
-      if (!ref) return psay('Enter your booking reference.', 'err');
+      const ref = cleanRef(), txn = q('.pay-txn').value.trim(), txn2 = q('.pay-txn2').value.trim();
+      if (ref.length !== 10) return psay('Enter your 10-character booking reference.', 'err');
       if (txn.length < 4) return psay('Enter the transaction number from your bank receipt.', 'err');
-      const offlineMsg = 'We could not save it online. Please send the number to us on WhatsApp or Viber with your reference ' + ref + '.';
+      if (txn !== txn2) return psay('The two transaction numbers do not match. Check them against your receipt.', 'err');
       if (!READY || !BANK.bank || !BANK.holder || !BANK.account) return psay('Online payment reporting or bank details are not configured. Contact the host.', 'err');
       psend.disabled = true; psay('Sending…');
       let error;
       try { ({ error } = await sb.rpc('submit_payment', { ref, txn })); } catch (e) { error = e; }
       psend.disabled = false;
-      if (error) return psay(error.message.includes('submit_payment') || /fetch|network|timeout/i.test(error.message) ? offlineMsg : error.message, 'err');
-      psay('Transaction reference received. This is not payment confirmation; the host will verify the transfer.', 'ok');
-      q('.pay-txn').value = '';
+      if (error) return psay(/fetch|network|timeout|load failed/i.test(error.message) ? 'We could not save it online. Please send the number to us on WhatsApp or Viber with your reference ' + showRef(ref) + '.' : error.message, 'err');
+      psay('Received: ' + txn + '. Your booking is NOT confirmed yet. We will check the transfer and confirm. If you typed the number wrong, enter the correct one and send again.', 'ok');
+      q('.pay-txn').value = ''; q('.pay-txn2').value = '';
+    });
+    q('.pay-check').addEventListener('click', async () => {
+      const ref = cleanRef();
+      if (ref.length !== 10) return psay('Enter your 10-character booking reference.', 'err');
+      if (!READY) return psay('Online booking is not switched on yet.', 'err');
+      psay('Checking…');
+      let data, error;
+      try { ({ data, error } = await sb.rpc('get_booking_status', { ref })); } catch (e) { error = e; }
+      if (error) return psay(error.message, 'err');
+      const t = data.txn ? ' Transaction number we have: ' + data.txn + '.' : '';
+      const m = {
+        pending: 'Waiting for your payment. After you transfer, send the transaction number above.',
+        payment_submitted: 'Payment received and waiting for our check. NOT confirmed yet.' + t + ' Wrong number? Send the correct one above.',
+        confirmed: 'Confirmed! Your stay ' + data.check_in + ' to ' + data.check_out + ' is booked.',
+        cancelled: 'This request was cancelled or expired. Please contact us.'
+      };
+      psay(m[data.status] || data.status, data.status === 'confirmed' ? 'ok' : '');
     });
   });
 
