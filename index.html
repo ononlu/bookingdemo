@@ -14,10 +14,6 @@
 .gal{display:flex;aspect-ratio:16/9;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;border-radius:var(--r);background:var(--line)}
 .gal img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center;scroll-snap-stop:always;display:block}
 .swipe{margin:8px 0 20px;color:var(--muted);font-size:.8rem}
-.mchips{margin-bottom:16px}
-.mchip{flex:none;padding:8px 16px;border-radius:999px;border:1px solid var(--line);font:inherit;font-size:.88rem;color:var(--muted);background:transparent;cursor:pointer}
-.mchip:hover{border-color:var(--ink);color:var(--ink)}
-.mchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -68,17 +64,8 @@
   <section class="mapsec" id="map">
     <div class="wrap">
       <div class="head"><h2>Apartments across Ulaanbaatar</h2><p class="count">7 apartments</p></div>
-      <div class="chips mchips" id="mapchips" role="group" aria-label="Choose an apartment to see on the map">
-        <button class="mchip on" type="button" data-apt="apt1" aria-pressed="true">1 · Naadam Center</button>
-        <button class="mchip" type="button" data-apt="apt2" aria-pressed="false">2 · Naadam Center</button>
-        <button class="mchip" type="button" data-apt="apt3" aria-pressed="false">3 · Central Square</button>
-        <button class="mchip" type="button" data-apt="apt4" aria-pressed="false">4 · Seoul Street</button>
-        <button class="mchip" type="button" data-apt="apt5" aria-pressed="false">5 · Peace Avenue</button>
-        <button class="mchip" type="button" data-apt="apt6" aria-pressed="false">6 · Seoul Street</button>
-        <button class="mchip" type="button" data-apt="apt7" aria-pressed="false">7 · Seoul Street</button>
-      </div>
-      <div id="map-canvas" role="region" aria-label="Map of the selected apartment"><iframe id="main-map" title="Map of the selected apartment" style="border:0;width:100%;height:100%;display:block" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-      <p class="note">Choose an apartment above to see where it is. <a id="map-open" href="#apt1" style="text-decoration:underline;font-weight:600">View this apartment</a></p>
+      <div id="map-canvas" role="region" aria-label="Map of apartments"></div>
+      <p class="note">Drag to move, scroll or pinch to zoom. Select a price to see the apartment.</p>
     </div>
   </section>
 
@@ -289,6 +276,8 @@
 
 </main>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
@@ -303,18 +292,30 @@
     { id: 'apt7', name: 'Bright & Spacious 1-bedroom, Downtown',     price: 190000, lat: 47.91258, lng: 106.89992 }
   ];
 
-  // ---------- Main map: same Google map as each apartment page ----------
-  const mainMap = document.getElementById('main-map');
-  const mapOpen = document.getElementById('map-open');
-  const mapChips = document.querySelectorAll('.mchip');
-  function showOnMap(id) {
-    const src = document.querySelector('#' + id + ' .gmap iframe').getAttribute('src');
-    if (mainMap.getAttribute('src') !== src) mainMap.setAttribute('src', src);
-    mapOpen.setAttribute('href', '#' + id);
-    mapChips.forEach(c => { const on = c.dataset.apt === id; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+  if (typeof L === 'undefined') {
+    document.getElementById('map-canvas').textContent = 'Map temporarily unavailable. Apartment listings and booking forms are still accessible below.';
+  } else {
+    const map = L.map('map-canvas', { scrollWheelZoom: false });
+    const local = location.protocol === 'file:';
+    L.tileLayer(local
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
+      : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: local ? 18 : 19,
+      attribution: local
+        ? 'Tiles &copy; Esri &mdash; Source: Esri, HERE, Garmin, OpenStreetMap contributors'
+        : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    map.on('focus', () => map.scrollWheelZoom.enable());
+    map.on('blur',  () => map.scrollWheelZoom.disable());
+    const points = apartments.map(a => {
+      const icon = L.divIcon({ className: 'price-wrap', iconSize: [0, 0], html: '<span class="price-pin">' + (a.price / 1000) + 'k ₮</span>' });
+      L.marker([a.lat, a.lng], { icon, title: a.name }).addTo(map)
+        .bindPopup('<strong>' + a.name + '</strong><br>' + a.price.toLocaleString('en-US') + ' ₮ per night<br><a href="#' + a.id + '">View apartment →</a>');
+      return [a.lat, a.lng];
+    });
+    map.fitBounds(points, { padding: [50, 50], maxZoom: 15 });
+    window.addEventListener('hashchange', () => setTimeout(() => map.invalidateSize(), 50));
   }
-  mapChips.forEach(c => c.addEventListener('click', () => showOnMap(c.dataset.apt)));
-  showOnMap('apt1');
 
   // ---------- Booking (Supabase) ----------
   const cfg = window.NOOK_CONFIG || {};
